@@ -1,15 +1,17 @@
 from flask_jwt_extended import (create_access_token, create_refresh_token,
 jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
 from flask_restful import Resource, reqparse
-from models import User, RevokedToken, Cart
+from models import User, RevokedToken, Cart, ItemCart
 from flask import request
+from sqlalchemy.orm import Load, load_only
+from sqlalchemy.sql import func
 import json
+from itertools import chain
 
-
-parser = reqparse.RequestParser()
 
 class UserRegistration(Resource):
     def post(self):
+        parser = reqparse.RequestParser()
         parser.add_argument('username', help = 'This field cannot be blank', required = True)
         parser.add_argument('password', help = 'This field cannot be blank', required = True)
 
@@ -37,6 +39,7 @@ class UserRegistration(Resource):
 
 class UserLogin(Resource):
     def post(self):
+        parser = reqparse.RequestParser()
         parser.add_argument('username', help = 'This field cannot be blank', required = True)
         parser.add_argument('password', help = 'This field cannot be blank', required = True)
         data = parser.parse_args()
@@ -102,7 +105,10 @@ class Baskets(Resource):
 
     @jwt_required
     def delete(self, cart_id):
-        return Cart.delete(cart_id)
+        if not cart_id:
+            return {'message': 'Missing card id'}, 500
+        else:
+            return Cart.delete(cart_id)
 
     @jwt_required
     def post(self):
@@ -114,6 +120,27 @@ class Baskets(Resource):
 
         Cart(current_user.id, data['items'])
         return {'message': 'Cart created'}
+
+
+class ProductFootprint(Resource):
+    @jwt_required
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('start_at', help = 'This field cannot be blank', required = True)
+        parser.add_argument('end_at', help = 'This field cannot be blank', required = True)
+        data = parser.parse_args()
+        current_user = User.find_by_username(get_jwt_identity())
+
+        if not current_user:
+          return {'message': 'User {} not found'}
+
+        carts = ItemCart.get_footprint(current_user.id, data['start_at'], data['end_at'])
+        food = { 'foods': list(map(lambda c: {'name': c[2], 'foot_print': c[3] }, carts))}
+
+        return food
+
+
+
 
 class SecretResource(Resource):
     @jwt_required

@@ -1,6 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from passlib.hash import pbkdf2_sha256 as sha256
 from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import Load, load_only
+from sqlalchemy.sql import func
 import os
 
 db = SQLAlchemy()
@@ -73,6 +75,29 @@ class ItemCart(db.Model):
     def __repr__(self):
         return "<ItemCart: {}>".format(self.id)
 
+
+    def get_footprint(user_id, start_at, end_at):
+        try:
+            carts = db.session.query(ItemCart.id,
+                                    ItemCart.ean,
+                                    ItemCart.name,
+                                    Cart.total_footprint,
+                                    func.sum(ItemCart.carbon_footprint))\
+                            .join(Cart)\
+                            .filter(Cart.user_id == user_id)\
+                            .filter(Cart.created_at.between(start_at, end_at))\
+                            .options(
+                                Load(ItemCart).load_only("ean", "name")
+                            )\
+                            .group_by(ItemCart.id,
+                                      ItemCart.ean,
+                                      ItemCart.name,
+                                      Cart.total_footprint
+                            ).all()
+            return carts
+        except:
+            return 'Something went wrong'
+
 class Cart(db.Model):
     """Users Basket"""
 
@@ -132,10 +157,12 @@ class Cart(db.Model):
     def delete(cart_id):
         try:
             cart = Cart.query.get(cart_id)
+            import pdb; pdb.set_trace()
             db.session.delete(cart)
-            return {'message': '{} cart deleted'.format(cart.id)}
+            db.session.commit()
+            return {'message': '{} cart deleted'.format(cart.id)}, 204
         except:
-            return {'message': 'Something went wrong'}
+            return {'message': 'Something went wrong'}, 500
 
     @staticmethod
     def return_all(user_id):
