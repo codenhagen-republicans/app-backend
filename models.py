@@ -1,12 +1,13 @@
 from flask_sqlalchemy import SQLAlchemy
 from passlib.hash import pbkdf2_sha256 as sha256
 from sqlalchemy.orm import joinedload
+import os
 
 db = SQLAlchemy()
 
 def init_db(app):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://green_app:green_app@localhost/green_app'
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ["DATABASE_URL"]
     db.init_app(app)
     return db
 

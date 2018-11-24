@@ -3,7 +3,7 @@
 
 from flask import Flask
 from flask_restful import Api
-import views, resources, models
+import views, resources, models, os
 from flask_jwt_extended import JWTManager
 
 app = Flask(__name__)
@@ -36,4 +36,5 @@ api.add_resource(resources.AllUsers, '/users')
 api.add_resource(resources.SecretResource, '/secret')
 api.add_resource(resources.Baskets, '/baskets')
 
-app.run(debug=True)
+port = int(os.environ.get('PORT', 5000))
+app.run(host='0.0.0.0', port=port, debug=True)
