@@ -6,11 +6,15 @@ parser.add_argument('username', help = 'This field cannot be blank', required = 
 parser.add_argument('password', help = 'This field cannot be blank', required = True)
 
 class UserRegistration(Resource):
-    def post(self):        
+    def post(self):
         data = parser.parse_args()
+
+        if User.find_by_username(data['username']):
+          return {'message': 'User {} already exists'. format(data['username'])}
+
         new_user = User(
             username = data['username'],
-            password = data['password']
+            password = User.generate_hash(data['password'])
         )
         try:
             new_user.save_to_db()
@@ -24,7 +28,14 @@ class UserRegistration(Resource):
 class UserLogin(Resource):
     def post(self):
         data = parser.parse_args()
-        return data
+        current_user = User.find_by_username(data['username'])
+        if not current_user:
+            return {'message': 'User {} doesn\'t exist'.format(data['username'])}
+
+        if User.verify_hash(data['password'], current_user.password):
+            return {'message': 'Logged in as {}'.format(current_user.username)}
+        else:
+            return {'message': 'Wrong credentials'}
 
 
 class UserLogoutAccess(Resource):
@@ -44,10 +55,10 @@ class TokenRefresh(Resource):
 
 class AllUsers(Resource):
     def get(self):
-        return {'message': 'List of users'}
+        return User.return_all()
 
     def delete(self):
-        return {'message': 'Delete all users'}
+        return User.delete_all()
 
 
 class SecretResource(Resource):
