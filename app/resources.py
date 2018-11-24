@@ -88,6 +88,8 @@ class AllUsers(Resource):
     def delete(self):
         return User.delete_all()
 
+class AddToBasket(Resource):
+    pass
 
 class SecretResource(Resource):
     @jwt_required

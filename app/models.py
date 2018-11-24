@@ -16,6 +16,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(120), unique = True, nullable = False)
     password = db.Column(db.String(120), nullable = False)
+    carts = db.relationship('Cart', order_by='Cart.id', cascade="all, delete-orphan")
 
     def save_to_db(self):
         db.session.add(self)
@@ -50,6 +51,62 @@ class User(db.Model):
             return {'message': '{} row(s) deleted'.format(num_rows_deleted)}
         except:
             return {'message': 'Something went wrong'}
+
+
+class ItemCart(db.Model):
+    """Product Items in the basket"""
+
+    __table__name = 'items_cart'
+
+    id = db.Column(db.Integer, primary_key=True)
+    cart_id = db.Column(db.Integer, db.ForeignKey('cart.id'))
+    ean = db.Column(db.String(120), unique = True, nullable = False)
+    name = db.Column(db.String(120))
+    price = db.Column(db.Float)
+    quantity = db.Column(db.Integer)
+    cart = db.relationship('Cart', backref=db.backref('items_cart', lazy=True))
+
+
+    def __repr__(self):
+        return "<ItemCart: {}>".format(self.id)
+
+class Cart(db.Model):
+    """Users Basket"""
+
+    __table__name = 'cart'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    update_date = db.Column(db.DateTime, default=db.func.current_timestamp(),
+                            onupdate=db.func.current_timestamp())
+    paid = db.Column(db.Boolean, default=False)
+    carts = db.relationship('User', backref=db.backref('users', lazy=True))
+
+
+    def __repr__(self):
+        return "<Cart: {}>".format(self.id)
+
+    def save(self, user_id, cart_items):
+        self.user_id = user_id
+        self.cart_items = cart_items
+        db.session.add(self)
+        db.session.flush()
+        for item in self.cart_items:
+            db.session.add(
+                ItemCart(ean=item['ean'], name=item['name'],
+                    price=item['price'], quantity=item['quantity']
+                )
+            )
+        db.session.commit()
+
+    @staticmethod
+    def get_all(user_id):
+        return Cart.query.options(joinedload('items_cart')).filter_by(user_id=user_id)
+
+    @staticmethod
+    def get_one(user_id, cart_id):
+        return Cart.query.options(joinedload('items_cart')).filter_by(user_id=user_id).filter_by(id=cart_id).first()
 
 
 class RevokedToken(db.Model):
