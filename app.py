@@ -3,7 +3,7 @@
 
 from flask import Flask
 from flask_restful import Api
-import views, resources, models, os
+import views, resources, models
 from flask_jwt_extended import JWTManager
 
 app = Flask(__name__)
