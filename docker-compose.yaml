@@ -6,7 +6,7 @@ services:
 
     ports:
       - target: 5432
-        published: 1443
+        published: 5432
         protocol: tcp
         mode: host
 
@@ -14,3 +14,7 @@ services:
       - type: bind
         source: ./db
         target: /docker-entrypoint-initdb.d/
+
+  db-client:
+    image: postgres:alpine
+    command: ["psql", "-h", "db", "-U", "green_app"]
