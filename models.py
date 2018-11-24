@@ -119,7 +119,7 @@ class Cart(db.Model):
     def __init__(self, user_id, cart_items):
         self.user_id = user_id
         self.cart_items = cart_items
-        self.total_footprint = sum(i['carbon_footprint'] for i in cart_items)
+        self.total_footprint = sum(i['carbon_footprint']*i['quantity'] for i in cart_items)
         db.session.add(self)
         db.session.flush()
         for item in self.cart_items:
@@ -157,7 +157,6 @@ class Cart(db.Model):
     def delete(cart_id):
         try:
             cart = Cart.query.get(cart_id)
-            import pdb; pdb.set_trace()
             db.session.delete(cart)
             db.session.commit()
             return {'message': '{} cart deleted'.format(cart.id)}, 204

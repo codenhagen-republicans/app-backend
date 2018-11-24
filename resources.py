@@ -55,7 +55,7 @@ class UserLogin(Resource):
                     'refresh_token': refresh_token
             }
         else:
-            return {'message': 'Wrong credentials'}
+            return {'message': 'Wrong credentials'}, 401
 
 
 class UserLogoutAccess(Resource):
@@ -65,7 +65,7 @@ class UserLogoutAccess(Resource):
         try:
             revoked_token = RevokedToken(jti = jti)
             revoked_token.add()
-            return {'message': 'Access token has been revoked'}
+            return {'message': 'Access token has been revoked'}, 200
         except:
             return {'message': 'Something went wrong'}, 500
 
@@ -77,7 +77,7 @@ class UserLogoutRefresh(Resource):
         try:
             revoked_token = RevokedToken(jti = jti)
             revoked_token.add()
-            return {'message': 'Refresh token has been revoked'}
+            return {'message': 'Refresh token has been revoked'}, 200
         except:
             return {'message': 'Something went wrong'}, 500
 
@@ -87,7 +87,7 @@ class TokenRefresh(Resource):
     def post(self):
         current_user = get_jwt_identity()
         access_token = create_access_token(identity = current_user)
-        return {'access_token': access_token}
+        return {'access_token': access_token}, 200
 
 
 class AllUsers(Resource):
