@@ -18,7 +18,6 @@ app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 
 jwt = JWTManager(app)
 
-
 @app.before_first_request
 def create_tables():
     db.create_all()
@@ -35,5 +34,6 @@ api.add_resource(resources.UserLogoutRefresh, '/logout/refresh')
 api.add_resource(resources.TokenRefresh, '/token/refresh')
 api.add_resource(resources.AllUsers, '/users')
 api.add_resource(resources.SecretResource, '/secret')
+api.add_resource(resources.Baskets, '/baskets')
 
 app.run(debug=True)

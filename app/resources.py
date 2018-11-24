@@ -1,14 +1,18 @@
 from flask_jwt_extended import (create_access_token, create_refresh_token,
 jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
 from flask_restful import Resource, reqparse
-from models import User, RevokedToken
+from models import User, RevokedToken, Cart
+from flask import request
+import json
+
 
 parser = reqparse.RequestParser()
-parser.add_argument('username', help = 'This field cannot be blank', required = True)
-parser.add_argument('password', help = 'This field cannot be blank', required = True)
 
 class UserRegistration(Resource):
     def post(self):
+        parser.add_argument('username', help = 'This field cannot be blank', required = True)
+        parser.add_argument('password', help = 'This field cannot be blank', required = True)
+
         data = parser.parse_args()
 
         if User.find_by_username(data['username']):
@@ -33,6 +37,8 @@ class UserRegistration(Resource):
 
 class UserLogin(Resource):
     def post(self):
+        parser.add_argument('username', help = 'This field cannot be blank', required = True)
+        parser.add_argument('password', help = 'This field cannot be blank', required = True)
         data = parser.parse_args()
         current_user = User.find_by_username(data['username'])
         if not current_user:
@@ -88,8 +94,26 @@ class AllUsers(Resource):
     def delete(self):
         return User.delete_all()
 
-class AddToBasket(Resource):
-    pass
+class Baskets(Resource):
+    @jwt_required
+    def get(self):
+        current_user = User.find_by_username(get_jwt_identity())
+        return Cart.return_all(current_user.id)
+
+    @jwt_required
+    def delete(self, cart_id):
+        return Cart.delete(cart_id)
+
+    @jwt_required
+    def post(self):
+        data = request.get_json()
+        current_user = User.find_by_username(get_jwt_identity())
+
+        if not current_user:
+          return {'message': 'User {} not found'}
+
+        Cart(current_user.id, data['items'])
+        return {'message': 'Cart created'}
 
 class SecretResource(Resource):
     @jwt_required
