@@ -17,7 +17,7 @@ Start the PostgreSQL database:
 docker-compose up
 ```
 
-Start the Flask API server:
+Start the Flask App Backend server:
 
 ```sh
 pipenv install
@@ -25,7 +25,3 @@ pipenv run python app.py
 ```
 
 The API server should now be available on `localhost:5000`!
-
-# Demo
-
-http://greenapi.herokuapp.com/footprint?ean=6410405175724
