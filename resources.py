@@ -137,7 +137,7 @@ class ProductFootprint(Resource):
           return {'message': 'User {} not found'}
 
         carts = ItemCart.get_footprint(current_user.id, data['start_at'], data['end_at'])
-        food = { 'foods': list(map(lambda c: {'ean': c[0], 'name': c[1], 'foot_print': c[3] }, carts))}
+        food = { 'foods': list(map(lambda c: {'ean': c[0], 'name': c[1], 'foot_print': c[2] }, carts))}
 
         return food
 

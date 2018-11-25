@@ -84,7 +84,6 @@ class ItemCart(db.Model):
             carts = db.session.query(
                                     ItemCart.ean,
                                     ItemCart.name,
-                                    Cart.total_footprint,
                                     func.sum(ItemCart.carbon_footprint*ItemCart.quantity))\
                             .join(Cart)\
                             .filter(Cart.user_id == user_id)\
@@ -95,7 +94,6 @@ class ItemCart(db.Model):
                             .group_by(
                                       ItemCart.ean,
                                       ItemCart.name,
-                                      Cart.total_footprint
                             ).all()
             return carts
         except:
