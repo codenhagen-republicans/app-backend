@@ -81,7 +81,7 @@ class ItemCart(db.Model):
 
     def get_footprint(user_id, start_at, end_at):
         try:
-            carts = db.session.query(ItemCart.id,
+            carts = db.session.query(
                                     ItemCart.ean,
                                     ItemCart.name,
                                     Cart.total_footprint,
@@ -92,7 +92,7 @@ class ItemCart(db.Model):
                             .options(
                                 Load(ItemCart).load_only("ean", "name")
                             )\
-                            .group_by(ItemCart.id,
+                            .group_by(
                                       ItemCart.ean,
                                       ItemCart.name,
                                       Cart.total_footprint
