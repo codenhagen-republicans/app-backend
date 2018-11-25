@@ -5,6 +5,8 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy.orm import Load, load_only
 from sqlalchemy.sql import func
 import os
+import datetime, time
+
 
 db = SQLAlchemy()
 
@@ -177,7 +179,7 @@ class Cart(db.Model):
         def carts_to_json(c):
             return {
                 'id': c.id,
-                'created_at': str(c.created_at),
+                'created_at': c.created_at.timestamp(),
                 'total_footprint': c.total_footprint,
                 'items': list(map(lambda i: items_to_json(i), c.items_cart))
             }
