@@ -25,3 +25,7 @@ pipenv run python app.py
 ```
 
 The API server should now be available on `localhost:5000`!
+
+# Demo
+
+http://greenapi.herokuapp.com/footprint?ean=6410405175724
