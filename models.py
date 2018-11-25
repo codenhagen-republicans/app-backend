@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from slqalchemy.dialects.postgresql import TIMESTAMP
+from sqlalchemy.dialects.postgresql import TIMESTAMP
 from passlib.hash import pbkdf2_sha256 as sha256
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm import Load, load_only
