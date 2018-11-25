@@ -177,7 +177,7 @@ class Cart(db.Model):
         def carts_to_json(c):
             return {
                 'id': c.id,
-                'created_at': c.created_at,
+                'created_at': str(c.created_at),
                 'total_footprint': c.total_footprint,
                 'items': list(map(lambda i: items_to_json(i), c.items_cart))
             }

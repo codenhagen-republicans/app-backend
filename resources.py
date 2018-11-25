@@ -118,7 +118,9 @@ class Baskets(Resource):
           return {'message': 'User {} not found'}
 
         cart = Cart(current_user.id, data['items'])
-        return 'Done', 200
+        return {'id': cart.id, 'user_id': cart.user_id,
+                'created_at': str(cart.created_at),
+                'total_footprint': cart.total_footprint}, 200
 
 
 class ProductFootprint(Resource):
