@@ -6,8 +6,6 @@ from flask import request
 from sqlalchemy.orm import Load, load_only
 from sqlalchemy.sql import func
 import json
-from itertools import chain
-
 
 class UserRegistration(Resource):
     def post(self):
@@ -114,12 +112,13 @@ class Baskets(Resource):
     def post(self):
         data = request.get_json()
         current_user = User.find_by_username(get_jwt_identity())
+        print(data)
 
         if not current_user:
           return {'message': 'User {} not found'}
 
-        Cart(current_user.id, data['items'])
-        return {'message': 'Cart created'}
+        cart = Cart(current_user.id, data['items'])
+        return 'Done', 200
 
 
 class ProductFootprint(Resource):
@@ -129,6 +128,7 @@ class ProductFootprint(Resource):
         parser.add_argument('start_at', help = 'This field cannot be blank', required = True)
         parser.add_argument('end_at', help = 'This field cannot be blank', required = True)
         data = parser.parse_args()
+        print(data)
         current_user = User.find_by_username(get_jwt_identity())
 
         if not current_user:

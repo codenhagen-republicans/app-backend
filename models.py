@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from slqalchemy.dialects.postgresql import TIMESTAMP
 from passlib.hash import pbkdf2_sha256 as sha256
 from sqlalchemy.orm import joinedload
 from sqlalchemy.orm import Load, load_only
@@ -82,7 +83,7 @@ class ItemCart(db.Model):
                                     ItemCart.ean,
                                     ItemCart.name,
                                     Cart.total_footprint,
-                                    func.sum(ItemCart.carbon_footprint))\
+                                    func.sum(ItemCart.carbon_footprint*ItemCart.quantity))\
                             .join(Cart)\
                             .filter(Cart.user_id == user_id)\
                             .filter(Cart.created_at.between(start_at, end_at))\
@@ -105,8 +106,8 @@ class Cart(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
-    update_date = db.Column(db.DateTime, default=db.func.current_timestamp(),
+    created_at = db.Column(db.TIMESTAMP, default=db.func.current_timestamp())
+    update_date = db.Column(db.TIMESTAMP, default=db.func.current_timestamp(),
                             onupdate=db.func.current_timestamp())
     total_footprint = db.Column(db.Float)
     paid = db.Column(db.Boolean, default=False)
@@ -114,7 +115,7 @@ class Cart(db.Model):
 
 
     def __repr__(self):
-        return "<Cart: {}>".format(self.id)
+        return '{"id": "{0}", "user_id": "{1}", "created_at": "{2}", "total_footprint": "{3}"}'.format(self.id, self.user_id, self.created_at, self.total_footprint)
 
     def __init__(self, user_id, cart_items):
         self.user_id = user_id
@@ -176,7 +177,7 @@ class Cart(db.Model):
         def carts_to_json(c):
             return {
                 'id': c.id,
-                'created_at': str(c.created_at),
+                'created_at': c.created_at,
                 'total_footprint': c.total_footprint,
                 'items': list(map(lambda i: items_to_json(i), c.items_cart))
             }
